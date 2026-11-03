@@ -1,0 +1,245 @@
+import json, math
+D=json.load(open("results.json")); R=D["rows"]; S=D["sens"]; X=D["extra"]
+def n(v,d=1):
+    if v!=v: return "---"
+    return r"\num{%s}"%(f"{v:.{d}f}")
+def e(v,d=2):
+    m,ex=f"{v:.{d}e}".split("e"); return r"\num{%se%d}"%(m,int(ex))
+r32=[r for r in R if r["L"]==32][0]; r16=R[0]
+def row(r,cols): return " & ".join(cols(r))+r" \\"
+tab_geo="\n".join(row(r,lambda r:[n(r['L'],0),n(r['h'],1),n(r['a'],2),n(r['s'],1),n(r['sig'],1),n(r['crush'],0)]) for r in R)
+tab_buck="\n".join(row(r,lambda r:[n(r['L'],0),n(r['t_req'],2),n(r['t'],2),n(r['ec']*100,3),n(r['E'],2),n(r['FS'],2)]) for r in R)
+tab_th="\n".join(row(r,lambda r:[n(r['L'],0),n(r['t'],2),n(r['q'],1),n(r['Ti'],1),n(r['qmelt'],0),n(r['tau'],1),n(r['Ploss'],0)]) for r in R)
+tab_bad="\n".join(row(r,lambda r:[n(r['L'],0),n(r['t'],2),n(r['Tiw'],1),n(r['ecw']*100,2),n(r['Ew'],3),n(r['FSw'],2),(n(r['t_w'],2) if r['t_w']==r['t_w'] else r"$>8$")]) for r in R)
+tab_sens="\n".join(row(x,lambda x:[n(x['R'],2),n(x['q'],1),n(x['Ti'],1),n(x['FS'],2),n(x['P'],0)]) for x in S)
+tab_sum="\n".join(row(r,lambda r:[n(r['L'],0),n(r['h'],1),n(r['t'],2),n(r['sig'],0),n(r['FS'],1),n(r['FSw'],2),n(r['mslice'],0),n(r['Htie'],0)]) for r in R)
+melt=150/(917*334e3)*86400*100
+T=r"""\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,tabularx}
+\usepackage[group-separator={,},group-minimum-digits=4,exponent-product=\cdot]{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\sisetup{per-mode=symbol,group-digits=integer,range-phrase={--},range-units=single,list-separator={, },list-final-separator={, and },list-pair-separator={ and }}
+\sloppy
+\title{Structural Integrity of an Ice Shell\\Concentric Torus Habitat in Arcadia Planitia, Mars}
+\author{Concept-level calculation}
+\date{November 2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note checks whether a self-supporting ice vault (one ring of a torus habitat) can stand for spans of \SIlist{16;24;32;40}{\metre}, and how much heat from the habitat affects the ice. Compressive stress in the ice is small (\SIrange{46}{115}{\kilo\pascal}), but creep-driven buckling sets the shell thickness: \SI{0.6}{\metre} for \SIrange{16}{24}{\metre} spans, \SI{1.25}{\metre} for \SI{32}{\metre} and \SI{3.4}{\metre} for \SI{40}{\metre}. The governing variable is not span but ice temperature: the shell must stay near \SI{-60}{\celsius}, with insulation on the inner face ($R \geq \SI{4}{\metre\squared\kelvin\per\watt}$) and a reflective cover on the outer face. All numbers are concept-level estimates.
+\end{abstract}
+
+\section{Summary of results}
+\begin{table}[h]\centering\small
+\caption{Summary by span. FS = buckling safety factor after 30 years of creep. ``Damaged'' = reflective cover lost (\S\ref{sec:bad}).}
+\begin{tabular}{rrrrrrrr}\toprule
+$L$ & $h$ & $t$ & $\sigma_{\max}$ & FS & FS & Arch mass & Tie force \\
+(\si{\metre}) & (\si{\metre}) & (\si{\metre}) & (\si{\kilo\pascal}) & design & damaged & (\si{\tonne}) & (\si{\kilo\newton}) \\\midrule
+<<SUM>>
+\bottomrule\end{tabular}
+\end{table}
+Arch mass and floor-tie force are per \SI{2.5}{\metre}-wide segment.
+
+\section{Data and assumptions}
+\begin{table}[h]\centering\small
+\begin{tabularx}{\linewidth}{lrX}\toprule
+Quantity & Value & Note \\\midrule
+Mars gravity $g$ & \SI{3.71}{\metre\per\second\squared} & \\
+Ice density $\rho$ & \SI{917}{\kilo\gram\per\metre\cubed} & bubble-free \\
+Ice elastic modulus $E_0$ & \SI{9}{\giga\pascal} & short-term \\
+Latent heat $L_f$ & \SI{334}{\kilo\joule\per\kilo\gram} & \\
+Specific heat $c_p$ & \SI{1700}{\joule\per\kilo\gram\per\kelvin} & near \SI{-60}{\celsius} \\
+Conductivity $k(T)$ & $9.828\,e^{-0.0057T}$ \si{\watt\per\metre\per\kelvin} & $T$ in K; $k(\SI{-60}{\celsius})=\,$<<K60>> \si{\watt\per\metre\per\kelvin} \\
+Habitat air $T_{in}$ & \SI{20}{\celsius} & \\
+Mean outer-face temperature $T_o$ & \SI{-60}{\celsius} & with reflective cover; seasonal swing $\pm\SI{15}{\celsius}$ \\
+Insulation, module to ice $R_{ins}$ & \SI{4}{\metre\squared\kelvin\per\watt} & e.g.\ aerogel blanket $\approx\SI{6}{\centi\metre}$ \\
+Rise/span ratio $h/L$ & \num{0.5625} & same as the \SI{16}{\metre}~$\times$~\SI{9}{\metre} arch \\
+Design life $t_d$ & 30 years & \\
+Minimum thickness (shielding) & \SI{0.6}{\metre} & $\approx\SI{55}{\gram\per\centi\metre\squared}$ \\
+\bottomrule\end{tabularx}
+\end{table}
+The \SI{56.5}{\kilo\pascal} habitat pressure is held by inflatable modules, not by the ice. Between module and shell is a gap of low-pressure Mars gas, so the ice carries only its own weight.
+
+\section{Arch geometry}
+The arch is an inverted \emph{catenary}. Under uniform self-weight along the arch, this shape puts the whole section in pure compression, with no bending:
+\begin{equation}
+y(x) = h - a\left[\cosh\frac{x}{a}-1\right], \qquad -\tfrac{L}{2}\le x\le \tfrac{L}{2}.
+\end{equation}
+The parameter $a$ follows from the feet sitting on the ground:
+\begin{equation}
+a\left[\cosh\frac{L}{2a}-1\right]=h .
+\end{equation}
+Arc length:
+\begin{equation}
+s = 2a\sinh\frac{L}{2a}.
+\end{equation}
+
+\section{Loads}
+The main load is self-weight per unit shell area:
+\begin{equation}
+w=\rho g t .
+\end{equation}
+Other loads are very small:
+\begin{itemize}
+\item \textbf{Wind.} Dynamic pressure $q=\tfrac12\rho_{atm}v^2 \approx \tfrac12(0.02)(30)^2 \approx \SI{9}{\pascal}$, under \SI{1}{\percent} of the weight of a \SI{0.6}{\metre} shell ($\approx\SI{2.0}{\kilo\pascal}$). Neglected.
+\item \textbf{Habitat pressure.} Carried by the inflatable modules; it never reaches the ice.
+\item \textbf{Marsquakes.} Very weak compared with earthquakes. Neglected at concept stage.
+\end{itemize}
+
+\section{Compressive stress}
+For a catenary, the horizontal force is constant, $H = w\,a$, and the axial force at height $y$ is $N = w\,(a + h - y)$. It peaks at the feet ($y=0$). Dividing by thickness $t$, the thickness cancels:
+\begin{equation}
+\boxed{\;\sigma_{\max} = \rho\, g\,(a+h)\;}
+\end{equation}
+So the compressive stress depends only on arch size, not thickness. The crushing strength of cold ice is taken as \SI{5}{\mega\pascal} (conservative).
+
+\begin{table}[h]\centering\small
+\caption{Geometry and compressive stress.}
+\begin{tabular}{rrrrrr}\toprule
+$L$ (\si{\metre}) & $h$ (\si{\metre}) & $a$ (\si{\metre}) & $s$ (\si{\metre}) & $\sigma_{\max}$ (\si{\kilo\pascal}) & FS crushing \\\midrule
+<<GEO>>
+\bottomrule\end{tabular}
+\end{table}
+The ice will not crush: the safety factor exceeds 40 for every span.
+
+\section{Ice creep}
+Ice under sustained stress flows slowly. We use Glen's law ($n=3$):
+\begin{equation}
+\dot\varepsilon_{ij}=A(T)\,\tau_e^{\,n-1}\,\tau_{ij}.
+\end{equation}
+For uniaxial compression $\sigma$: $\tau_{11}=\tfrac23\sigma$ and $\tau_e=\sigma/\sqrt3$, so
+\begin{equation}
+\dot\varepsilon=\tfrac{2}{9}\,A(T)\,\sigma^{3}.
+\end{equation}
+The rate factor $A$ depends strongly on temperature (Arrhenius; Cuffey \& Paterson 2010):
+\begin{equation}
+A(T)=A^\ast\exp\!\left[-\frac{Q_c}{R}\left(\frac1T-\frac1{T^\ast}\right)\right],\quad
+A^\ast=\SI{3.5e-25}{\per\second\per\pascal\cubed},\; T^\ast=\SI{263}{\kelvin},\; Q_c=\SI{60}{\kilo\joule\per\mole}.
+\end{equation}
+Values: $A(\SI{-60}{\celsius})=$ <<A60>>, $A(\SI{-40}{\celsius})=$ <<A40>>, $A(\SI{-20}{\celsius})=$ <<A20>> \si{\per\second\per\pascal\cubed}. Every \SI{20}{\celsius} of warming makes ice creep roughly 10--20 times faster.
+
+Total creep strain over the design life, and the effective modulus used for buckling:
+\begin{equation}
+\varepsilon_c=\tfrac29\,\bar A\,\sigma_{\max}^3\,t_d,\qquad
+E_{\text{eff}}=\frac{\sigma_{\max}}{\sigma_{\max}/E_0+\varepsilon_c}.
+\end{equation}
+$\bar A$ is $A$ averaged through the shell thickness (temperature varies linearly from inner to outer face) and over one year (sinusoidal seasonal swing). Because $A$ rises exponentially with temperature, the warmest part dominates.
+
+\section{Buckling}
+A thin arch can snap out of shape and collapse even at low stress. For a two-hinged parabolic/catenary arch under uniform load (Timoshenko \& Gere 1961), the critical load per metre of width is
+\begin{equation}
+q_{cr}=\gamma\,\kappa\,\frac{E_{\text{eff}}\,I}{L^3},\qquad I=\frac{t^3}{12},
+\end{equation}
+with $\gamma\approx36$ for $h/L\approx0.56$ and an imperfection factor $\kappa=0.5$. The self-weight load per horizontal metre is $q=\rho g t\,s/L$. The safety factor is
+\begin{equation}
+\mathrm{FS}=\frac{q_{cr}}{q}=\frac{\gamma\,\kappa\,E_{\text{eff}}\,t^{2}}{12\,\rho\, g\, s\, L^{2}}
+\quad\Longrightarrow\quad
+t_{\text{req}}=L\sqrt{\frac{12\,\mathrm{FS}\,\rho\, g\, s}{\gamma\,\kappa\,E_{\text{eff}}\,L}} .
+\end{equation}
+Target $\mathrm{FS}\ge2.5$. The calculation is iterated because $E_{\text{eff}}$ depends on temperature, and the inner-face temperature depends on thickness (\S\ref{sec:thermal}). Design thickness is rounded up to \SI{5}{\centi\metre} and is never below \SI{0.6}{\metre} (radiation shielding).
+
+\begin{table}[h]\centering\small
+\caption{Required thickness against buckling (design case: $T_o=\SI{-60}{\celsius}\pm\SI{15}{\celsius}$, $R_{ins}=4$).}
+\begin{tabular}{rrrrrr}\toprule
+$L$ (\si{\metre}) & $t_{\text{req}}$ (\si{\metre}) & $t$ design (\si{\metre}) & $\varepsilon_c$ 30 yr (\si{\percent}) & $E_{\text{eff}}$ (\si{\giga\pascal}) & FS \\\midrule
+<<BUCK>>
+\bottomrule\end{tabular}
+\end{table}
+Required thickness grows much faster than span: from \SI{24}{\metre} to \SI{40}{\metre} it rises more than fivefold. Two reasons: a larger arch loads the ice harder, so it creeps faster ($E_{\text{eff}}$ drops), and buckling stiffness falls with $L^3$. Stiffening ribs at segment joints would reduce this, because $I$ grows with the cube of section depth.
+
+\section{Thermal behaviour and inner-surface melting}\label{sec:thermal}
+\subsection{Heat-flow model}
+Heat flows from the habitat air, through the insulation, through the ice, and is radiated to the sky from the outer face. Steady state, one dimension:
+\begin{equation}
+q=\frac{T_{in}-T_o}{R_{ins}+t/k},\qquad
+T_i=T_o+q\,\frac{t}{k},
+\end{equation}
+where $q$ is the heat flux (\si{\watt\per\metre\squared}) and $T_i$ the inner-face ice temperature. Total heat loss for ring 1 uses the inner area $A_{in}=2\pi R_1 s$ with $R_1 = \SI{20}{\metre}+L/2$ (\O\SI{40}{\metre} courtyard). This is an upper bound, since the modules are smaller than the shell.
+
+\subsection{Melting criterion}
+The inner face reaches \SI{0}{\celsius} if the flux into the ice exceeds
+\begin{equation}
+q_{\text{melt}}=\frac{k\,(0-T_o)}{t}.
+\end{equation}
+If a local source (lamps, machinery, a person leaning on it, a leak of warm air) delivers more than $q_{\text{melt}}$, ice starts to melt at a rate
+\begin{equation}
+v=\frac{q-q_{\text{melt}}}{\rho\,L_f}.
+\end{equation}
+Example: an excess of \SI{150}{\watt\per\metre\squared} melts $\approx$ \num{<<MELT>>} \si{\centi\metre\per\day}. The time for heat to pass through the full thickness is
+\begin{equation}
+\tau=\frac{t^2}{\alpha},\qquad \alpha=\frac{k}{\rho c_p}=\,<<ALPHA>>\;\si{\metre\squared\per\second}.
+\end{equation}
+
+\begin{table}[h]\centering\small
+\caption{Thermal results, design case ($T_o=\SI{-60}{\celsius}$, $R_{ins}=\SI{4}{\metre\squared\kelvin\per\watt}$).}
+\begin{tabular}{rrrrrrr}\toprule
+$L$ (\si{\metre}) & $t$ (\si{\metre}) & $q$ (\si{\watt\per\metre\squared}) & $T_i$ (\si{\celsius}) & $q_{\text{melt}}$ (\si{\watt\per\metre\squared}) & $\tau$ (days) & Ring 1 heat loss (\si{\kilo\watt}) \\\midrule
+<<TH>>
+\bottomrule\end{tabular}
+\end{table}
+
+With $R=4$ insulation the inner face stays at \SIrange{-56}{-41}{\celsius}, far from melting. Thicker shells run slightly warmer inside, because the ice itself adds thermal resistance. The values of $\tau$ (days to weeks) mean temperature sensors have time to catch a hot spot before any ice melts.
+
+\subsection{Insulation and structural safety}
+Heat from inside does not only risk melting; it warms the ice and speeds up creep. For a \SI{32}{\metre} span with $t=\SI{1.25}{\metre}$:
+\begin{table}[h]\centering\small
+\caption{Sensitivity to insulation (\SI{32}{\metre} span).}
+\begin{tabular}{rrrrr}\toprule
+$R_{ins}$ (\si{\metre\squared\kelvin\per\watt}) & $q$ (\si{\watt\per\metre\squared}) & $T_i$ (\si{\celsius}) & FS buckling & Heat loss (\si{\kilo\watt}) \\\midrule
+<<SENS>>
+\bottomrule\end{tabular}
+\end{table}
+With too little insulation ($R<2$), the inner face warms to \SIrange{-35}{-7}{\celsius} and the buckling safety factor drops below 1: \textbf{the arch slowly sags until it collapses}, long before any ice melts. Creep, not melting, is the governing criterion. Thick insulation also cuts the habitat's heating demand.
+
+\subsection{Daily and seasonal temperature swings}\label{sec:bad}
+The penetration depth of a temperature wave is $d=\sqrt{\alpha P/\pi}$:
+\begin{itemize}
+\item daily (1 sol): $d\approx$ \num{<<DDAY>>} \si{\metre}, only the outer skin;
+\item seasonal (1 Mars year): $d\approx$ \num{<<DYEAR>>} \si{\metre}, deeper than the shell. The whole shell warms in summer.
+\end{itemize}
+Damaged case: the reflective cover is lost, so the mean outer-face temperature rises to \SI{-55}{\celsius} with a $\pm\SI{30}{\celsius}$ swing (summer peak \SI{-25}{\celsius}) for the whole design life.
+\begin{table}[h]\centering\small
+\caption{Damaged case (reflective cover lost).}
+\begin{tabular}{rrrrrrr}\toprule
+$L$ (\si{\metre}) & $t$ (\si{\metre}) & $T_i$ (\si{\celsius}) & $\varepsilon_c$ (\si{\percent}) & $E_{\text{eff}}$ (\si{\giga\pascal}) & FS & $t$ required (\si{\metre}) \\\midrule
+<<BAD>>
+\bottomrule\end{tabular}
+\end{table}
+Only the \SI{16}{\metre} span stays safe. Larger spans require a maintained reflective cover, temperature monitoring, and a repair plan.
+
+\section{Thrust at the arch feet}
+The horizontal force at the feet per metre of width, $H=\rho g t\, a$, is carried by basalt floor ties between the inner and outer feet. For a \SI{32}{\metre} span, the force per \SI{2.5}{\metre} segment is $\approx$ \SI{<<HTIE32>>}{\kilo\newton}. With basalt-bar tensile strength $\approx\SI{1000}{\mega\pascal}$ and FS 3, the required area is $\approx\SI{300}{\milli\metre\squared}$: about one \O\SI{20}{\milli\metre} bar per segment.
+
+\section{Conclusions and design rules}
+\begin{enumerate}
+\item Compressive stress is not a problem for any span studied.
+\item Thickness is set by creep-driven buckling: \SI{0.6}{\metre} (\SIrange{16}{24}{\metre}), \SI{1.25}{\metre} (\SI{32}{\metre}), \SI{3.4}{\metre} (\SI{40}{\metre}). A \SI{40}{\metre} span is impractical without ribs.
+\item Ice temperature is the key design variable. Keep the inner face $\le\SI{-50}{\celsius}$ with insulation $R\ge\SI{4}{\metre\squared\kelvin\per\watt}$; keep the outer face near \SI{-60}{\celsius} with a reflective cover.
+\item Inner-surface melting only occurs where local flux exceeds $q_{\text{melt}}$ (\SIrange{50}{290}{\watt\per\metre\squared}). Heat sources must not touch or shine directly on the ice; an air gap and insulation blanket are mandatory.
+\item Fit thermistors and strain gauges in every segment. The thermal response time of several days leaves time to act.
+\item Spans of 24--32 m are feasible for public spaces (sports hall, pool) if rule 3 is met.
+\end{enumerate}
+
+\section{Limitations}
+The buckling model uses an effective-modulus method and two-hinged arch coefficients, not finite-element analysis. Each arch is treated as an independent strip; shell action between segments and ring curvature are ignored, so results are conservative. Creep parameters come from terrestrial glacier ice; ice frozen in bags may differ. Arcadia surface temperatures and the effect of the reflective cover should be checked with a climate model (Mars Climate Database). Sublimation from the outer face has not been calculated.
+
+\section*{References}
+\begin{itemize}
+\item Cuffey, K.\,M. \& Paterson, W.\,S.\,B. (2010). \emph{The Physics of Glaciers}, 4th ed. Elsevier. (Glen's law, $A(T)$)
+\item Glen, J.\,W. (1955). The creep of polycrystalline ice. \emph{Proc.\ R.\ Soc.\ A} 228, 519--538.
+\item Petrenko, V.\,F. \& Whitworth, R.\,W. (1999). \emph{Physics of Ice}. Oxford University Press.
+\item Timoshenko, S.\,P. \& Gere, J.\,M. (1961). \emph{Theory of Elastic Stability}, 2nd ed. McGraw-Hill.
+\item Bramson, A.\,M. et al.\ (2015). Widespread excess ice in Arcadia Planitia, Mars. \emph{Geophys.\ Res.\ Lett.} 42.
+\end{itemize}
+\end{document}
+"""
+rep={"<<SUM>>":tab_sum,"<<GEO>>":tab_geo,"<<BUCK>>":tab_buck,"<<TH>>":tab_th,"<<BAD>>":tab_bad,"<<SENS>>":tab_sens,
+"<<K60>>":n(X['k60'],2),"<<A60>>":e(X['A'][0]),"<<A40>>":e(X['A'][2]),"<<A20>>":e(X['A'][3]),
+"<<MELT>>":f"{melt:.1f}","<<ALPHA>>":e(X['alpha']),"<<DDAY>>":f"{X['d_day']:.2f}","<<DYEAR>>":f"{X['d_year']:.1f}",
+"<<HTIE32>>":f"{r32['Htie']:.0f}"}
+for k,v in rep.items(): T=T.replace(k,v)
+open("structural_integrity_EN.tex","w").write(T)
