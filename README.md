@@ -50,7 +50,7 @@ Water is already the material every crewed outpost needs for drinking, oxygen an
 
 - **It must stay cold.** Ice under sustained load flows slowly, like a glacier (creep). Every 20 °C of warming makes it creep 10–20 times faster. Creep, not melting, is what limits an ice structure.
 - **It must be sealed and shaded.** In vacuum and sunlight, exposed ice sublimates. Bag-moulds keep it sealed; sunshades and reflective covers keep it below about 150 K in space.
-- **Insulation goes between the warm habitat and the ice**, not outside the ice. Ice conducts heat about as well as granite (≈2.9 W/m·K at −60 °C); a layer of CO₂-filled cells (≈0.01 W/m·K) does the insulating, and the ice stays on the cold side.
+- **Insulation goes between the warm habitat and the ice**, not outside the ice. Ice conducts heat about as well as granite (≈2.9 W/m·K at −60 °C); a layer of CO₂-filled cells (≈0.01 W/m·K) does the insulating, and the ice stays on the cold side, as in NASA Langley's Mars Ice Home concept (2016).
 - **It must only be squeezed.** Shapes are chosen so the ice is in compression everywhere: catenary arches on planets, prestressed hoops in spinning rings.
 
 ## Why now
@@ -225,6 +225,7 @@ All numbers are concept-level estimates. The structural model uses an effective-
 - Timoshenko, S. P. & Gere, J. M. (1961). *Theory of Elastic Stability*, 2nd ed. McGraw-Hill.
 - O'Neill, G. K. (1977). *The High Frontier*. William Morrow. (Stanford torus)
 - Johnson, R. D. & Holbrow, C. (eds.) (1977). *Space Settlements: A Design Study*. NASA SP-413.
+- NASA Langley Research Center, with Clouds Architecture Office and SEArch+ (2016). *Mars Ice Home*: an inflatable habitat inside a water-ice shell, insulated by a CO₂ layer. [NASA Langley release via Phys.org](https://phys.org/news/2016-12-nasa-ice-house-mars.html).
 
 ## Origin
 
