@@ -1,6 +1,6 @@
 # Ice Torus
 
-**Ice as the concrete of space.** We design habitats whose structure and radiation shield are made of water ice, frozen in place inside inflatable bag-moulds. The long-term goal is ice-shielded rotating stations built from Moon and asteroid water.
+**We propose that ice is the new concrete of space.** We design habitats whose structure and radiation shield are made of water ice, frozen in place inside inflatable bag-moulds. The long-term goal is ice-shielded rotating stations built from Moon and asteroid water.
 
 ![Concentric torus habitat with a central pumping tower](figures/T1_torus_3d.png)
 
