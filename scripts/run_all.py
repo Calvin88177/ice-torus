@@ -4,7 +4,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 FIG = os.path.join(ROOT, "figures")
 SCRIPTS = ["torus_3d.py", "section_plan.py", "arch_options.py", "formwork.py",
-           "compass_cables.py", "leapfrog_rails.py", "pitch_figs.py", "ice_properties.py"]
+           "compass_cables.py", "leapfrog_rails.py", "pitch_figs.py", "ice_properties.py",
+           "isru_water_chain.py"]
 os.makedirs(FIG, exist_ok=True)
 for s in SCRIPTS:
     print("->", s)

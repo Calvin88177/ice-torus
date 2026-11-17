@@ -64,7 +64,7 @@ Water is already the material every crewed outpost needs for drinking, oxygen an
 
 ## Design 1: a concentric ice-ring habitat on Mars
 
-**Site:** Arcadia Planitia, northern mid-latitudes, above a buried ice sheet up to ~40 m thick.
+**Site:** Utopia Planitia (≈40° N, 80° E), northern mid-latitudes, above thick buried ice (moved from Arcadia Planitia, which was used in the first structural report).
 
 The habitat grows outward in concentric rings around a central robotic pumping tower. Each ring is a row of whole ice arches, each 2.5 m wide, cast in place one after another. Pressurised inflatable modules sit inside the arches; the ice is an unpressurised shield and shell, so it carries only its own weight.
 
@@ -95,6 +95,10 @@ Arch span 16 m, rise 9 m, ice thickness 0.6 m; 12 m service gaps between rings, 
 | ![Precast vs. cast-in-place arches](figures/T4_arch_options.png) | ![Compass-cable guidance](figures/T6_compass_cables.png) |
 
 ![Leapfrog rails](figures/T7_leapfrog_rails.png)
+
+![ISRU water chain: ground ice to a cast ice arch](figures/ISRU_water_chain.png)
+
+**Architectural drawings.** Six A1 sheets developing Ring 1 into an inhabited plan (floor plans, mezzanine, sections, full ring, wellness and Rodwell zones) are in [`architecture/ar4155_ring1`](architecture/ar4155_ring1).
 
 ### Structural check
 
@@ -184,7 +188,7 @@ Ice is a poor choice near heat sources, in permanent sunlight without shading, o
 - [ ] Shape accuracy and bubble content of ice frozen in drop-stitch bags, on the ground and in microgravity.
 - [ ] Sublimation rate through bag materials in vacuum, sunlight and Earth infrared.
 - [ ] Real freezing time per arch on Mars, day and night; currently estimated at 5–8 days.
-- [ ] Rodwell output in Arcadia ice, which may contain dust and perchlorate.
+- [ ] Rodwell output in Utopia Planitia ice, which may contain dust and perchlorate.
 - [ ] Openings (windows, docking ports, gates) in a prestressed hoop.
 - [ ] Fragment containment for spinning test rings.
 
@@ -195,6 +199,8 @@ ice-torus/
 ├── README.md
 ├── requirements.txt        numpy, scipy, matplotlib
 ├── figures/                all figures (PNG, some SVG)
+├── architecture/
+│   └── ar4155_ring1/       Ring 1 architectural drawings (6 A1 sheets, PDF + SVG) and their generators
 ├── scripts/                code that draws every figure
 │   ├── run_all.py          regenerates everything
 │   └── draw2d.py           shared colour palette
